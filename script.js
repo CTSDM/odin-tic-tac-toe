@@ -1,9 +1,13 @@
+// Let's update how a player works
+// there is no computer player
+// there is player one and player two
+// by default their name will be 
+    
 // with this implementation we just have a global variable
 const startGame = (function (){
-    const createPlayer = function(name, symbol) {
-        const getName = () => name;
+    const createPlayer = function(symbol) {
         const getSymbol = () => symbol;
-        return {getName, getSymbol};
+        return {getSymbol};
     }
 
     const gameBoard = (function() {
@@ -18,27 +22,9 @@ const startGame = (function (){
             }
             arr.push(tempArr);
         }
-
-        const getLength = () => sizeBoard;
-
         const updateBoard = function (positionX, positionY, symbol) {
-            // for the console approach we check that the position are within 
-            // the actual limits of the gameboard
-            // second we check if it is possible to update
-            // this logic only has a purpose for the console based game
-            if (positionX >= getLength() || positionY > getLength()){
-                return {val: false, str_log:"The given position surpass the physical of the board."}
-            } else if (arr[positionX][positionY] !== emptyMarker) {
-                return {val: false, str_log:"The given positon already has a player marker."}
-            } else {
-                arr[positionX][positionY] = symbol;
-                return {val: true, victoryStatus: checkVictory(positionX, positionY), str_log:"The board has been updated correctly."}
-            }
-        }
-
-        const displayBoard = function() {
-            for (let i = 0; i < sizeBoard; ++i)
-                console.log(`${i}|${arr[i][0]} ${arr[i][1]} ${arr[i][2]}|`)
+            arr[positionX][positionY] = symbol;
+            return checkVictory(positionX, positionY);
         }
 
         const checkVictory = function(x, y) {
@@ -59,42 +45,44 @@ const startGame = (function (){
                 if ((arr[2][0] === arr[1][1]) && (arr[1][1] === arr[0][2]))
                     return true;
             }
-
-            // a victory occurs if a straight line has the same characters, being these different from `emptyMarker`
-            // if the symbols had associated a number, a first difference could be  computed in all axis...
-                // alternatively i can get the indexes corresponding to the users and return it as an array of objects, or array of arrays...
-                // furthermore, given the location of where the symbol is going to be placed I can just check those  conditions
-            // just check the column and the row and if needed the diagonal(s)
-            // no need to check the whole board
         }
 
-        return {getLength, updateBoard, displayBoard};
+        return {updateBoard};
     })();
 
-    const p1 = createPlayer("juanito", "X");
-    const p2 = createPlayer("alberto", "0");
-    const arrPlayers = [p1, p2];
-    let indexPlayer = 0;
-    gameBoard.displayBoard();
-    let turn = false;
+    // I need to add the event listener to all items and once the item is filled
+    // i disable the even listener. Therefore, i need to attach a function with a name
 
-    loopMain: while(true) {
-        indexPlayer = Math.abs(indexPlayer - 1);
-        while (true) {
-            // for the console based game we expect that the input are numbers between 0 and 2
-            let x = +prompt(`${arrPlayers[indexPlayer].getName()}, please type the row`);
-            let y = +prompt(`${arrPlayers[indexPlayer].getName()}, please type the column`);
-            ({val, victoryStatus, str_log} = gameBoard.updateBoard(x, y, arrPlayers[indexPlayer].getSymbol()));
-            if (val) {
-                gameBoard.displayBoard();
-                if (victoryStatus)
-                    break loopMain;
+    const itemsNodeList = document.querySelectorAll(".item");
+    for (const item of itemsNodeList) {
+        item.addEventListener("click", consoleFoo);
+
+        function consoleFoo() {
+            if (!victory) {
+                const imgEl = document.createElement("img");
+                imgEl.src = turn ? "./images/circle.svg" : "./images/alpha-x.svg";
+                const rowIndex = +item.parentElement.dataset.row;
+                const columnIndex = +item.dataset.index;
+                victory = gameBoard.updateBoard(rowIndex, columnIndex, arrPlayers[turn ? 0 : 1]);
                 turn = !turn;
-                break;
+                item.appendChild(imgEl);
+                if (victory) {
+                    for (const itemTemp of itemsNodeList) {
+                        itemTemp.removeEventListener("click", consoleFoo);
+                    }
+                    return
+                }
+                item.removeEventListener("click", consoleFoo);
             }
-            console.log(str_log);
         }
     }
+    
+
+    const p1 = createPlayer("X");
+    const p2 = createPlayer("0");
+    const arrPlayers = [p1, p2];
+    let victory = false;
+    let turn = false;
 })()
 
 
