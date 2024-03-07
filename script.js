@@ -15,13 +15,17 @@ const startGame = (function (){
         const sizeBoard = 3;
         const arr = [];
 
-        for (let i = 0; i < sizeBoard; ++i) {
-            let tempArr = [];
-            for (let j = 0; j < sizeBoard; ++j) {
-                tempArr.push(emptyMarker);
+        const resetBoard = function() {
+            while (arr.length > 0) arr.pop();
+            for (let i = 0; i < sizeBoard; ++i) {
+                let tempArr = [];
+                for (let j = 0; j < sizeBoard; ++j) {
+                    tempArr.push(emptyMarker);
+                }
+                arr.push(tempArr);
             }
-            arr.push(tempArr);
         }
+
         const updateBoard = function (positionX, positionY, symbol) {
             arr[positionX][positionY] = symbol;
             return checkVictory(positionX, positionY);
@@ -47,42 +51,79 @@ const startGame = (function (){
             }
         }
 
-        return {updateBoard};
+        return {updateBoard, resetBoard};
     })();
 
     // I need to add the event listener to all items and once the item is filled
     // i disable the even listener. Therefore, i need to attach a function with a name
 
     const itemsNodeList = document.querySelectorAll(".item");
-    for (const item of itemsNodeList) {
-        item.addEventListener("click", playOcurrence);
+    let itemsNotUsed = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+    let itemsUsed = [];
+    for (let i = 0; i < itemsNodeList.length; ++i) {
+        itemsNodeList[i].addEventListener("click", playOcurrence);
+    }
 
-        function playOcurrence() {
-            if (!victory) {
-                const imgEl = document.createElement("img");
-                imgEl.src = turn ? "./images/circle.svg" : "./images/alpha-x.svg";
-                const rowIndex = +item.parentElement.dataset.row;
-                const columnIndex = +item.dataset.index;
-                victory = gameBoard.updateBoard(rowIndex, columnIndex, arrPlayers[turn ? 0 : 1]);
-                turn = !turn;
-                item.appendChild(imgEl);
-                if (victory) {
-                    for (const itemTemp of itemsNodeList) {
-                        itemTemp.removeEventListener("click", playOcurrence);
-                    }
-                    return
+    function playOcurrence(e) {
+        if (!victory) {
+            const item = e.target;
+            const imgEl = document.createElement("img");
+            imgEl.src = turn ? "./images/circle.svg" : "./images/alpha-x.svg";
+            const rowIndex = +item.parentElement.dataset.row;
+            const columnIndex = +item.dataset.index;
+            index = rowIndex * 3 + columnIndex;
+            itemsNotUsed.splice(index, 1);
+            itemsUsed.push(index);
+            console.log(itemsUsed);
+            console.log(itemsNotUsed);
+            console.log("///////////////")
+            victory = gameBoard.updateBoard(rowIndex, columnIndex, arrPlayers[turn ? 0 : 1]);
+            turn = !turn;
+            item.appendChild(imgEl);
+            if (victory) {
+                for (const itemTemp of itemsNodeList) {
+                    itemTemp.removeEventListener("click", playOcurrence);
                 }
-                item.removeEventListener("click", playOcurrence);
+                // we create a buttton to restart the game
+                const buttReset = document.createElement("button");
+                buttReset.innerHTML = "RESET";
+                const header = document.querySelector(".header");
+                buttReset.addEventListener("click", resetBoard);
+                header.appendChild(buttReset);
             }
+            item.removeEventListener("click", playOcurrence);
         }
     }
-    
+
+    function resetBoard(e) {
+        gameBoard.resetBoard();
+        resetDisplay();
+        for (item of itemsNodeList) {
+            item.addEventListener("click", playOcurrence);
+        }
+        victory = false;
+        turn = false;
+        e.target.remove();
+    }
+
+    function resetDisplay() {
+        for (index of itemsNotUsed) {
+            itemsNodeList[index].removeEventListener("click", playOcurrence);
+        }
+        for (index of itemsUsed){
+            itemsNodeList[index].removeChild(itemsNodeList[index].querySelector("img"));
+        }
+        itemsNotUsed = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+        itemsUsed = [];
+
+    }
 
     const p1 = createPlayer("X");
     const p2 = createPlayer("0");
     const arrPlayers = [p1, p2];
     let victory = false;
     let turn = false;
+    gameBoard.resetBoard();
 })()
 
 
