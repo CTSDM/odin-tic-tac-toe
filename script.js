@@ -55,9 +55,9 @@ const startGame = (function (){
 
     const itemsNodeList = document.querySelectorAll(".item");
     for (const item of itemsNodeList) {
-        item.addEventListener("click", consoleFoo);
+        item.addEventListener("click", playOcurrence);
 
-        function consoleFoo() {
+        function playOcurrence() {
             if (!victory) {
                 const imgEl = document.createElement("img");
                 imgEl.src = turn ? "./images/circle.svg" : "./images/alpha-x.svg";
@@ -68,11 +68,11 @@ const startGame = (function (){
                 item.appendChild(imgEl);
                 if (victory) {
                     for (const itemTemp of itemsNodeList) {
-                        itemTemp.removeEventListener("click", consoleFoo);
+                        itemTemp.removeEventListener("click", playOcurrence);
                     }
                     return
                 }
-                item.removeEventListener("click", consoleFoo);
+                item.removeEventListener("click", playOcurrence);
             }
         }
     }
