@@ -61,11 +61,11 @@
     })();
 
     const itemsNodeList = document.querySelectorAll(".item");
-    let itemsNotUsed = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-    let itemsUsed = [];
-    for (let i = 0; i < itemsNodeList.length; ++i) {
-        itemsNodeList[i].addEventListener("click", playOcurrence);
-    }
+    const totalNumberItems = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+    const itemsNotUsed = [];
+    const itemsUsed = [];
+    totalNumberItems.forEach((item) => itemsNotUsed.push(item));
+    itemsNodeList.forEach(item => item.addEventListener("click", playOcurrence));
 
     function playOcurrence(e) {
         if (!victory) {
@@ -74,7 +74,7 @@
             imgEl.src = (turn_player === 1) ? "./images/circle.svg" : "./images/alpha-x.svg";
             const rowIndex = +item.parentElement.dataset.row;
             const columnIndex = +item.dataset.index;
-            index = rowIndex * 3 + columnIndex;
+            const index = rowIndex * 3 + columnIndex;
             itemsNotUsed.splice(index, 1);
             itemsUsed.push(index);
             victory = gameBoard.updateBoard(rowIndex, columnIndex, arrPlayers[turn_player]);
@@ -82,11 +82,9 @@
             if (victory) {
                 arrPlayers[turn_player].increaseScore();
                 updateScoreDOM();
-                for (const itemTemp of itemsNodeList) {
-                    itemTemp.removeEventListener("click", playOcurrence);
-                }
-                // we create a buttton to restart the game
-                // we create a button that allows for continuing the game
+                // we remove the event listener from where it hasn't been used
+                itemsNotUsed.forEach((idx) => itemsNodeList[idx].removeEventListener("click", playOcurrence));
+                
                 createButtons();
             } else if (gameBoard.getMoves() === 9) {
                 createButtons();
@@ -96,6 +94,7 @@
         }
     }
 
+    // create reset and continue buttons
     function createButtons() {
         const buttContinue = document.createElement("button");
         const buttReset = document.createElement("button");
@@ -109,16 +108,13 @@
     }
 
     function updateScoreDOM() {
-        const idx = turn_player;
-        const scoreSpan = document.querySelector(`#score-${idx}`);
-        scoreSpan.textContent = arrPlayers[idx].getScore();
+        const scoreSpan = document.querySelector(`#score-${turn_player}`);
+        scoreSpan.textContent = arrPlayers[turn_player].getScore();
     }
 
     function  resetGame() {
-    // there is no need for "e", we can just delete all buttons in the header
         resetScoreDOM();
         resetBoard();
-
         arrPlayers.forEach((player) => player.resetScore());
     }
 
@@ -132,27 +128,19 @@
     function resetBoard() {
         gameBoard.resetBoard();
         resetDisplay();
-        for (item of itemsNodeList) {
-            item.addEventListener("click", playOcurrence);
-        }
+        itemsNodeList.forEach((item) => item.addEventListener("click", playOcurrence))
         victory = false;
         turn_player = (turn_player === 1) ? 0 : 1;
         const buttonsStates = document.querySelectorAll("button");
-        for (const buttn of buttonsStates) {
-            buttn.remove();
-        }
+        buttonsStates.forEach((button) => button.remove());
     }
 
     function resetDisplay() {
-        for (index of itemsNotUsed) {
-            itemsNodeList[index].removeEventListener("click", playOcurrence);
-        }
-        for (index of itemsUsed){
-            itemsNodeList[index].removeChild(itemsNodeList[index].querySelector("img"));
-        }
-        itemsNotUsed = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-        itemsUsed = [];
-
+        itemsNotUsed.forEach((index) => itemsNodeList[index].removeEventListener("click", playOcurrence));
+        itemsUsed.forEach((index) => itemsNodeList[index].removeChild(itemsNodeList[index].querySelector("img")));
+        while(itemsNotUsed.length > 0) itemsNotUsed.pop();
+        totalNumberItems.forEach((item) => itemsNotUsed.push(item));
+        while(itemsUsed.length > 0) itemsUsed.pop();
     }
 
     const p1 = createPlayer("X");
