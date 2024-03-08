@@ -1,10 +1,6 @@
-// Let's update how a player works
-// there is no computer player
-// there is player one and player two
-// by default their name will be 
-
-// with this implementation we just have a global variable
-const startGame = (function (){
+// With this implementation we just have an IIFE.
+// The game starts.
+(function (){
     const createPlayer = function(symbol) {
         let score = 0;
 
@@ -21,7 +17,8 @@ const startGame = (function (){
         const sizeBoard = 3;
         const arr = [];
         let moves = 0;
-
+        
+        const getMoves = () => moves;
         const resetBoard = function() {
             while (arr.length > 0) arr.pop();
             for (let i = 0; i < sizeBoard; ++i) {
@@ -60,13 +57,8 @@ const startGame = (function (){
             }
         }
 
-        const getMoves = () => moves;
-
         return {updateBoard, resetBoard, getMoves};
     })();
-
-    // I need to add the event listener to all items and once the item is filled
-    // i disable the even listener. Therefore, i need to attach a function with a name
 
     const itemsNodeList = document.querySelectorAll(".item");
     let itemsNotUsed = [0, 1, 2, 3, 4, 5, 6, 7, 8];
@@ -79,17 +71,16 @@ const startGame = (function (){
         if (!victory) {
             const item = e.target;
             const imgEl = document.createElement("img");
-            imgEl.src = turn ? "./images/circle.svg" : "./images/alpha-x.svg";
+            imgEl.src = (turn_player === 1) ? "./images/circle.svg" : "./images/alpha-x.svg";
             const rowIndex = +item.parentElement.dataset.row;
             const columnIndex = +item.dataset.index;
             index = rowIndex * 3 + columnIndex;
             itemsNotUsed.splice(index, 1);
             itemsUsed.push(index);
-            turn = !turn;
-            victory = gameBoard.updateBoard(rowIndex, columnIndex, arrPlayers[turn ? 0 : 1]);
+            victory = gameBoard.updateBoard(rowIndex, columnIndex, arrPlayers[turn_player]);
             item.appendChild(imgEl);
             if (victory) {
-                arrPlayers[turn ? 0 : 1].increaseScore();
+                arrPlayers[turn_player].increaseScore();
                 updateScoreDOM();
                 for (const itemTemp of itemsNodeList) {
                     itemTemp.removeEventListener("click", playOcurrence);
@@ -99,9 +90,8 @@ const startGame = (function (){
                 createButtons();
             } else if (gameBoard.getMoves() === 9) {
                 createButtons();
-                console.log("EMPATEEEE");
             }
-            console.log(gameBoard.getMoves());
+            turn_player = (turn_player === 1 ? 0 : 1);
             item.removeEventListener("click", playOcurrence);
         }
     }
@@ -119,23 +109,24 @@ const startGame = (function (){
     }
 
     function updateScoreDOM() {
-        const idx = turn ? 0 : 1;
+        const idx = turn_player;
         const scoreSpan = document.querySelector(`#score-${idx}`);
         scoreSpan.textContent = arrPlayers[idx].getScore();
     }
 
     function  resetGame() {
     // there is no need for "e", we can just delete all buttons in the header
-        resetScore(0);
+        resetScoreDOM();
         resetBoard();
-        for (const player of arrPlayers) {
-            player.resetScore();
-        }
+
+        arrPlayers.forEach((player) => player.resetScore());
     }
 
-    function resetScore(index) {
-        const scoreSpan = document.querySelector(`#score-${index}`);
-        scoreSpan.textContent = 0;
+    function resetScoreDOM() {
+        for (let i = 0; i < arrPlayers.length; ++ i) {
+            const scoreSpan = document.querySelector(`#score-${i}`);
+            scoreSpan.textContent = 0;
+        }
     }
 
     function resetBoard() {
@@ -145,7 +136,7 @@ const startGame = (function (){
             item.addEventListener("click", playOcurrence);
         }
         victory = false;
-        turn = false;
+        turn_player = (turn_player === 1) ? 0 : 1;
         const buttonsStates = document.querySelectorAll("button");
         for (const buttn of buttonsStates) {
             buttn.remove();
@@ -168,7 +159,7 @@ const startGame = (function (){
     const p2 = createPlayer("0");
     const arrPlayers = [p1, p2];
     let victory = false;
-    let turn = false;
+    let turn_player = 0;
     gameBoard.resetBoard();
 })()
 
