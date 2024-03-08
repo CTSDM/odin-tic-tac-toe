@@ -100,11 +100,11 @@
         const buttReset = document.createElement("button");
         buttContinue.innerHTML = "CONTINUE";
         buttReset.innerHTML = "RESET";
-        const header = document.querySelector(".header");
+        const buttonContainer = document.querySelector(".buttonsFlow");
         buttContinue.addEventListener("click", resetBoard);
         buttReset.addEventListener("click", resetGame);
-        header.appendChild(buttReset);
-        header.appendChild(buttContinue);
+        buttonContainer.appendChild(buttReset);
+        buttonContainer.appendChild(buttContinue);
     }
 
     function updateScoreDOM() {
@@ -150,5 +150,3 @@
     let turn_player = 0;
     gameBoard.resetBoard();
 })()
-
-
