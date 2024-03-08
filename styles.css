@@ -8,12 +8,12 @@ html {
     padding: 0;
 }
 
-.container {
+.container-game {
     display: grid;
     grid-template-columns: minmax(60px,auto) auto minmax(60px,auto);
 }
 
-.container-game {
+.container-board {
     display: grid;
     max-width: 1000px;
     max-height: 1000px;

@@ -2,18 +2,25 @@
 // there is no computer player
 // there is player one and player two
 // by default their name will be 
-    
+
 // with this implementation we just have a global variable
 const startGame = (function (){
     const createPlayer = function(symbol) {
+        let score = 0;
+
+        const increaseScore = function () {++score};
+        const getScore = () => score;
+        const resetScore = function () {score = 0;};
         const getSymbol = () => symbol;
-        return {getSymbol};
+
+        return {getScore, getSymbol, increaseScore, resetScore};
     }
 
     const gameBoard = (function() {
         const emptyMarker = '-';
         const sizeBoard = 3;
         const arr = [];
+        let moves = 0;
 
         const resetBoard = function() {
             while (arr.length > 0) arr.pop();
@@ -24,9 +31,11 @@ const startGame = (function (){
                 }
                 arr.push(tempArr);
             }
+            moves = 0;
         }
 
         const updateBoard = function (positionX, positionY, symbol) {
+            ++moves;
             arr[positionX][positionY] = symbol;
             return checkVictory(positionX, positionY);
         }
@@ -51,7 +60,9 @@ const startGame = (function (){
             }
         }
 
-        return {updateBoard, resetBoard};
+        const getMoves = () => moves;
+
+        return {updateBoard, resetBoard, getMoves};
     })();
 
     // I need to add the event listener to all items and once the item is filled
@@ -74,28 +85,60 @@ const startGame = (function (){
             index = rowIndex * 3 + columnIndex;
             itemsNotUsed.splice(index, 1);
             itemsUsed.push(index);
-            console.log(itemsUsed);
-            console.log(itemsNotUsed);
-            console.log("///////////////")
-            victory = gameBoard.updateBoard(rowIndex, columnIndex, arrPlayers[turn ? 0 : 1]);
             turn = !turn;
+            victory = gameBoard.updateBoard(rowIndex, columnIndex, arrPlayers[turn ? 0 : 1]);
             item.appendChild(imgEl);
             if (victory) {
+                arrPlayers[turn ? 0 : 1].increaseScore();
+                updateScoreDOM();
                 for (const itemTemp of itemsNodeList) {
                     itemTemp.removeEventListener("click", playOcurrence);
                 }
                 // we create a buttton to restart the game
-                const buttReset = document.createElement("button");
-                buttReset.innerHTML = "RESET";
-                const header = document.querySelector(".header");
-                buttReset.addEventListener("click", resetBoard);
-                header.appendChild(buttReset);
+                // we create a button that allows for continuing the game
+                createButtons();
+            } else if (gameBoard.getMoves() === 9) {
+                createButtons();
+                console.log("EMPATEEEE");
             }
+            console.log(gameBoard.getMoves());
             item.removeEventListener("click", playOcurrence);
         }
     }
 
-    function resetBoard(e) {
+    function createButtons() {
+        const buttContinue = document.createElement("button");
+        const buttReset = document.createElement("button");
+        buttContinue.innerHTML = "CONTINUE";
+        buttReset.innerHTML = "RESET";
+        const header = document.querySelector(".header");
+        buttContinue.addEventListener("click", resetBoard);
+        buttReset.addEventListener("click", resetGame);
+        header.appendChild(buttReset);
+        header.appendChild(buttContinue);
+    }
+
+    function updateScoreDOM() {
+        const idx = turn ? 0 : 1;
+        const scoreSpan = document.querySelector(`#score-${idx}`);
+        scoreSpan.textContent = arrPlayers[idx].getScore();
+    }
+
+    function  resetGame() {
+    // there is no need for "e", we can just delete all buttons in the header
+        resetScore(0);
+        resetBoard();
+        for (const player of arrPlayers) {
+            player.resetScore();
+        }
+    }
+
+    function resetScore(index) {
+        const scoreSpan = document.querySelector(`#score-${index}`);
+        scoreSpan.textContent = 0;
+    }
+
+    function resetBoard() {
         gameBoard.resetBoard();
         resetDisplay();
         for (item of itemsNodeList) {
@@ -103,7 +146,10 @@ const startGame = (function (){
         }
         victory = false;
         turn = false;
-        e.target.remove();
+        const buttonsStates = document.querySelectorAll("button");
+        for (const buttn of buttonsStates) {
+            buttn.remove();
+        }
     }
 
     function resetDisplay() {
