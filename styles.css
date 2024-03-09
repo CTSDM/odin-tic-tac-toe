@@ -6,20 +6,23 @@ body,
 html {
     margin: 0;
     padding: 0;
+    min-width: 900px;
 }
 
 .container-game {
     display: grid;
-    grid-template-columns: minmax(60px,auto) auto minmax(60px,auto);
+    gap: 20px;
+    grid-template-columns: minmax(200px, 1fr) 4fr minmax(200px, 1fr);
 }
 
 .container-board {
     display: grid;
     max-width: 1000px;
-    max-height: 1000px;
-    grid-template-columns: minmax(600px, 1fr);
-    grid-auto-rows: minmax(200px, 1fr);
-    gap: 20px
+    width: 100%;
+    aspect-ratio:  1 / 1;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    justify-self: center;
 }
 
 .player {
@@ -30,17 +33,18 @@ html {
 .row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     gap: 20px;
 }
 
 .item {
     background: skyblue;
     flex-grow: 1;
-    height: 100%;
+    aspect-ratio: 1 / 1;
     border-radius: 20px;
     position: relative;
     border: 2px solid blue;
+    display: grid;
+    place-items: center;
 }
 
 .item::before,
