@@ -12,12 +12,12 @@ html {
 .container-game {
     display: grid;
     gap: 20px;
-    grid-template-columns: minmax(200px, 1fr) 4fr minmax(200px, 1fr);
+    grid-template-columns: minmax(200px, 1fr) 2fr minmax(200px, 1fr);
 }
 
 .container-board {
     display: grid;
-    max-width: 1000px;
+    max-width: 800px;
     width: 100%;
     aspect-ratio:  1 / 1;
     grid-template-columns: 1fr;
@@ -27,7 +27,16 @@ html {
 
 .player {
     align-self: center;
-    justify-self: center;
+}
+
+.player:first-child {
+    padding-right: 10px;
+    justify-self: end;
+}
+
+.player:last-child {
+    padding-left: 10px;
+    justify-self: start;
 }
 
 .row {
